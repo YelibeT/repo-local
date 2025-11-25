@@ -1,0 +1,21 @@
+.navs{
+    display: flex;
+    list-style: none;
+    gap: 30px;
+}
+.dishes{
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 10px;
+}
+.menu{
+    align-items: center;
+    text-align: center;
+}
+img{
+    width: 150px;
+    height: auto;
+}
+a{
+    text-decoration: none;
+}

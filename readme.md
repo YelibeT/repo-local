@@ -1,0 +1,1 @@
+This project emphasizes on the need of shift in focus for Ethiopian food. The Ethiopian restaurant website aims in promoting Ethiopian cultural food.

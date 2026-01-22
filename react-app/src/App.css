@@ -112,44 +112,6 @@ h1{
 .food:hover{
     background-color: var(--food-hover);
 }
-.popup {
-    position: fixed;
-    inset: 0;                                
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: rgba(0, 0, 0, 0.4);          
-    visibility: hidden;
-    opacity: 0;
-    transition: all 300ms ease;
-    z-index: 9999; 
-    color:black;                          
-}
-.popup:target {
-    visibility: visible;
-    opacity: 1;
-}
-.popup-window {
-    background: white;
-    padding: 30px;
-    width: 350px;
-    border-radius: 15px;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-}
-#popup-btn{
-    padding: 8px 18px;
-    border-radius: 25px;
-    background-color: var(--background-button);
-    color: white;
-    font-weight: 600;
-    transition: 0.3s;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
-    border: none;
-}
-#popup-btn:hover{
-    background-color: #000000;
-}
 .close {
     position: absolute;
     top: 10px;
@@ -270,6 +232,7 @@ a:hover {
   color: var(--btn-hover);
 }
 .popup {
+    color: black;
   position: fixed;
   inset: 0;
   display: flex;
@@ -279,8 +242,6 @@ a:hover {
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(5px);
 
-  visibility: hidden;
-  opacity: 0;
   transition: all 300ms ease;
   z-index: 9999;
 }
@@ -418,4 +379,12 @@ a:hover{
 
 .cart-item button {
   margin: 0 5px;
+}
+#btn,#reset-btn{
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    padding: 10px;
+    width:100%;
+    border: 1px solid black;
+    border-radius: 10px;
+    margin: 5px;
 }

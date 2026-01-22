@@ -8,7 +8,6 @@ export default function Menu() {
   const [loading, setLoading] = useState(false);
   const [cart, setCart] = useState([]);
   const [activePopup, setActivePopup] = useState(null);
-  const [count, setCount]=useState(0); 
 
   // Fetch menu items from backend
   const fetchMenu = useCallback(async () => {
@@ -31,7 +30,6 @@ export default function Menu() {
     }
   }, [query, fasting]);
 
-  // Debounce search
   useEffect(() => {
     const timeout = setTimeout(() => {
       fetchMenu();
@@ -39,22 +37,35 @@ export default function Menu() {
     return () => clearTimeout(timeout);
   }, [query, fasting, fetchMenu]);
 
-  // Add item to cart
   const addToCart = (item) => {
     const existing = cart.find((i) => i.menuItem === item._id);
     if (existing) {
       setCart(
         cart.map((i) =>
-          i.menuItem === item._id ? { ...i, quantity: i.quantity + 1 } : i
-        )
+          i.menuItem === item._id ? { ...i, quantity: i.quantity + 1 } : i,
+        ),
       );
     } else {
-      setCart([...cart, { menuItem: item._id, name: item.name, price: item.price, quantity: 1 }]);
+      setCart([
+        ...cart,
+        { menuItem: item._id, name: item.name, price: item.price, quantity: 1 },
+      ]);
     }
     alert(`${item.name} added to cart!`);
   };
-
-  // Place order
+  const decreaseQty = (id) => {
+    setCart(
+      cart
+        .map((i) =>
+          i.menuItem === id ? { ...i, quantity: i.quantity - 1 } : i,
+        )
+        .filter((i) => i.quantity > 0),
+    );
+  };
+  const totalPrice = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
   const placeOrder = async () => {
     if (!cart.length) return alert("Cart is empty!");
 
@@ -68,8 +79,8 @@ export default function Menu() {
         customerPhone,
       });
       alert(res.data.message);
-      setCart([]); // Clear cart
-      setActivePopup(null); // Close popup
+      setCart([]);
+      setActivePopup(null);
     } catch (err) {
       console.error(err);
       alert("Failed to place order.");
@@ -77,82 +88,89 @@ export default function Menu() {
   };
 
   return (
-    <div>
-      <section>
-        {/* Search bar + fasting filter */}
-        <form onSubmit={(e) => e.preventDefault()} className="menu-search-form">
+    <div className="menu-layout">
+      <div className="menu-section">
+        <form className="menu-search-form" onSubmit={(e) => e.preventDefault()}>
           <input
-            type="text"
             id="search-input"
-            placeholder="Search menu..."
+            placeholder="search for menu..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
-          <button id="search-btn" type="button" onClick={fetchMenu}>
-            Search
-          </button>
         </form>
-
-        <h1>Menu</h1>
-
         {loading ? (
-          <p>Loading menu...</p>
+          <p>Loading...</p>
         ) : (
           <div className="dishes">
-            {["Non-fasting", "Fasting"].map((type) => (
-              <div key={type} id={type} className={type === "Fasting" ? "fasting" : ""}>
-                <h2>{type}</h2>
-                {menuItems
-                  .filter(
-                    (item) =>
-                      (type === "Fasting" && item.isFasting) ||
-                      (type === "Non-fasting" && !item.isFasting)
-                  )
-                  .map((item) => (
-                    <div key={item._id} className="food">
-                      {/* Click to open popup */}
-                      <div
-                        className="food-trigger"
-                        onClick={() => setActivePopup(item._id)}
-                      >
-                        <img src={item.image} alt={item.name} />
-                        <h3>{item.name}</h3>
-                      </div>
+            {menuItems.map((item) => (
+              <div key={item._id} className="food" id={`popup-${item._id}`}>
+                <div onClick={() => setActivePopup(item._id)}>
+                  <img src={item.image} alt={item.name} />
+                  <h3>{item.name}</h3>
+                </div>
 
-                      {/* Popup for this item */}
-                      {activePopup === item._id && (
-                        <div className="popup">
-                          <div className="popup-window">
-                            <button className="close" onClick={() => setActivePopup(null)}>
-                              &times;
-                            </button>
-                            <h4>{item.name}</h4>
-                            <p>{item.description || "No description"}</p>
-                            <div className="btns">
-                              <button id="btn" onClick={()=>setCount(count+1)}>+</button>
-                              <button id="reset-btn" onClick={()=>setCount(0)} >Reset</button>
-                              <button id="btn" onClick={()=>setCount(count-1)}>-</button>
-                            </div>
-                            <p>Price: {item.price} birr</p>
-                            <button onClick={() => addToCart(item)}>Add to Cart</button>
-                          </div>
-                        </div>
-                      )}
+                {activePopup === item._id && (
+                  <div className="popup" onClick={() => setActivePopup(null)}>
+                    <div
+                      className="popup-window"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button onClick={() => setActivePopup(null)}>×</button>
+                      <h4>{item.name}</h4>
+                      <p>{item.description}</p>
+                      <p>{item.price} birr</p>
+                      <button onClick={() => addToCart(item)}>
+                        Add to Cart
+                      </button>
                     </div>
-                  ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
         )}
+      </div>
 
-        {/* Cart footer */}
-        {cart.length > 0 && (
-          <div className="cart-footer">
-            <p>Items in cart: {cart.reduce((acc, i) => acc + i.quantity, 0)}</p>
+      {/* CART */}
+      <div className="cart-section">
+        <h2>Cart</h2>
+
+        {cart.length === 0 ? (
+          <p>No items yet</p>
+        ) : (
+          <>
+            {cart.map((item) => (
+              <div key={item.menuItem} className="cart-item">
+                <span>{item.name}</span>
+                <div>
+                  <button onClick={() => decreaseQty(item.menuItem)}>-</button>
+                  <span>{item.quantity}</span>
+                  <button
+                    onClick={() =>
+                      setCart((prev) =>
+                        prev.map((i) =>
+                          i.menuItem === item.menuItem
+                            ? { ...i, quantity: i.quantity + 1 }
+                            : i,
+                        ),
+                      )
+                    }
+                  >
+                    +
+                  </button>
+                </div>
+                <span>{item.price * item.quantity} birr</span>
+              </div>
+            ))}
+
+            <hr />
+            <p>
+              <strong>Total:</strong> {totalPrice} birr
+            </p>
             <button onClick={placeOrder}>Place Order</button>
-          </div>
+          </>
         )}
-      </section>
+      </div>
     </div>
   );
 }

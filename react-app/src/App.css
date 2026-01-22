@@ -284,10 +284,6 @@ a:hover {
   transition: all 300ms ease;
   z-index: 9999;
 }
-.popup:target {
-  visibility: visible;
-  opacity: 1;
-}
 .popup-window {
   background: white;
   position: relative;
@@ -398,4 +394,28 @@ footer{
 }
 a:hover{
     color: var(--btn-hover);
+}
+.menu-layout {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  gap: 20px;
+}
+
+.cart-section {
+  background: #111;
+  color: white;
+  padding: 20px;
+  border-radius: 12px;
+  position: sticky;
+  top: 20px;
+}
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.cart-item button {
+  margin: 0 5px;
 }

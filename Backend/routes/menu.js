@@ -13,41 +13,39 @@ router.get("/categories", async (req, res) => {
   }
 });
 
-
 router.get("/items", async (req, res) => {
   try {
-    const {fasting}=req.query;
-    const filter={ available: true}
-    if( fasting==="true"){
-      filter.isFasting=true;
+    const { fasting } = req.query;
+    const filter = { available: true };
+    if (fasting === "true") {
+      filter.isFasting = true;
     }
-    const items = await Menu.find({}).populate("category", "name");
+    const items = await Menu.find(filter).populate("category", "name");
     res.json(items);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-router.get("/search", async(req,res)=>{
-  const {q,fasting}=req.query;
+router.get("/search", async (req, res) => {
+  const { q, fasting } = req.query;
 
-  if(!q){
-    return res.status(400).json({message: "Query parameter is required"})
+  if (!q) {
+    return res.status(400).json({ message: "Query parameter is required" });
   }
-  try{
-    const filter={
-      name:{ $regex:q, $options:"i"},
-      available:true
+  try {
+    const filter = {
+      name: { $regex: q, $options: "i" },
+      available: true,
+    };
+    if (fasting === "true") {
+      filter.isFasting = true;
     }
-    if(fasting==="true"){
-      filter.isFasting=true;
-    }
-    const results=await Menu.find({}).populate("category", "name")
+    const results = await Menu.find(filter).populate("category", "name");
     res.json(results);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
-  catch(error){
-    res.status(500).json({error:error.message})
-  }
-})
+});
 
 export default router;

@@ -1,66 +1,79 @@
-import React from "react";
+import React, { useState } from "react";
 
 export default function Home() {
+  const [activeItem, setActiveItem] = useState(null);
+
+  const specials = [
+    {
+      id: 1,
+      name: "Dirikosh Firfir",
+      image: "/images/ድርቆሽፍ.jpg",
+      description: "Traditional Ethiopian firfir made from dried injera."
+    },
+    {
+      id: 2,
+      name: "Special Kitifo",
+      image: "/images/ክትፎ.jpg",
+      description: "Finely minced raw beef seasoned with spices and butter."
+    },
+    {
+      id: 3,
+      name: "Awaze Tibis",
+      image: "/images/አዋዜጥብስ.jpeg",
+      description: "Sautéed beef cubes cooked with awaze sauce."
+    }
+  ];
+
   return (
     <div>
+      {/* HERO */}
       <section id="Home" className="hero">
         <div className="intro">
-          <div className="">
-            <h1>Abyssinia Restaurant</h1>
-            <h2>Authentic Taste of Ethiopian Cuisine</h2>
-          </div>
+          <h1>Abyssinia Restaurant</h1>
+          <h2>Authentic Taste of Ethiopian Cuisine</h2>
         </div>
       </section>
+
+      {/* SPECIALS */}
       <section className="services">
         <h3>Chef's Specialities</h3>
+
         <div className="specials">
-          <div className="food">
-            <a href="#d-popup" title="click for more details">
-              <img src="/images/ድርቆሽፍ.jpg" alt="Dirikosh Firfir"></img>
-              <h4>Dirikosh Firfir</h4>
-            </a>
-            <div className="popup" id="d-popup">
-              <div className="popup-window">
-                <a href="#" className="close">
-                  &times;
-                </a>
-                <p>Description</p>
-                <button id="popup-btn">Order</button>
-              </div>
+          {specials.map((item) => (
+            <div
+              key={item.id}
+              className="food"
+              onClick={() => setActiveItem(item)}
+            >
+              <img src={item.image} alt={item.name} />
+              <h4>{item.name}</h4>
             </div>
-          </div>
-          <div className="food">
-            <a href="#k-popup">
-              <img src="/images/ክትፎ.jpg" alt=""></img>
-              <h4>Special Kitifo</h4>
-            </a>
-            <div className="popup" id="k-popup">
-              <div className="popup-window">
-                <a href="#" className="close">
-                  &times;
-                </a>
-                <p>Description</p>
-                <button id="popup-btn">Order</button>
-              </div>
-            </div>
-          </div>
-          <div className="food">
-            <a href="#a-popup">
-              <img src="/images/አዋዜጥብስ.jpeg" alt=""></img>
-              <h4>Awaze Tibis</h4>
-            </a>
-            <div className="popup" id="a-popup">
-              <div className="popup-window">
-                <a href="#" className="close">
-                  &times;
-                </a>
-                <p>Description</p>
-                <button id="popup-btn">Order</button>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
       </section>
+
+      {/* POPUP */}
+      {activeItem && (
+        <div className="popup" onClick={() => setActiveItem(null)}>
+          <div
+            className="popup-window"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="close"
+              onClick={() => setActiveItem(null)}
+            >
+              &times;
+            </button>
+
+            <img src={activeItem.image} alt={activeItem.name} />
+            <h4>{activeItem.name}</h4>
+            <p>{activeItem.description}</p>
+
+            <button id="popup-btn">Order</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

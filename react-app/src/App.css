@@ -112,17 +112,7 @@ h1{
 .food:hover{
     background-color: var(--food-hover);
 }
-.close {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 35px;
-    color: black;
-    font-weight: bold;
-}
-.close:hover {
-    color: red;
-}
+
 img{
     width: 200px !important;
     height: 200px !important;
@@ -141,21 +131,6 @@ a{
 }
 a:hover{
     color: var(--btn-hover);
-}
-:root {
-  --background: #ffffff;
-  --background-dish: #c2c2bc;
-  --food-hover: #3f3f3f;
-  --background-button: #202020;
-  --btn: #c9c9c9;
-  --btn-hover: #ffffff;
-  --text-color: #000000;
-  --footer: #e0e0e0;
-}
-body {
-  background-color: var(--background);
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  color: var(--text-color);
 }
 nav {
   display: flex;
@@ -231,52 +206,6 @@ a {
 a:hover {
   color: var(--btn-hover);
 }
-.popup {
-    color: black;
-  position: fixed;
-  inset: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(5px);
-
-  transition: all 300ms ease;
-  z-index: 9999;
-}
-.popup-window {
-  background: white;
-  position: relative;
-  padding: 30px;
-  width: 350px;
-  border-radius: 15px;
-  text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-}
-#popup-btn {
-  padding: 8px 18px;
-  border-radius: 25px;
-  background-color: var(--background-button);
-  color: white;
-  font-weight: 600;
-  transition: 0.3s;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-  border: none;
-}
-.close {
-  position: absolute;
-  top: 10px;
-  right: 15px;
-  font-size: 35px;
-  text-decoration: none;
-  color: black;
-  font-weight: bold;
-}
-
-.close:hover {
-  color: red;
-}
 footer {
   background-color: var(--footer);
   color: var(--text-color);
@@ -289,40 +218,6 @@ footer {
   text-align: center;
   font-size: 14px;
   color: #555;
-}
-:root{
-    --background: #ffffff;
-    --background-dish: #c2c2bc;
-    --about-hover: #3f3f3f;
-    --background-button: #202020;
-    --btn: #c9c9c9;
-    --btn-hover: #ffffff;
-    --text-color: #ffffff;
-    --footer:#e0e0e0;
-}
-body{
-    background-color: var(--background);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: var(--text-color);
-}
-nav{
-    display: flex;
-    justify-content: flex-end;
-}
-.navs{
-    display: flex;
-    list-style: none;
-    gap: 30px;
-}
-.navs a{
-    padding: 8px 18px;
-    border-radius: 25px;
-    background-color: var(--background-button);
-    text-decoration: none;
-    color: white;
-    font-weight: 600;
-    transition: 0.3s;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
 }
 .welcome , .about, .vision{
     display: flex;
@@ -360,6 +255,113 @@ a:hover{
   display: grid;
   grid-template-columns: 3fr 1fr;
   gap: 20px;
+}
+/* Dark background overlay */
+.popup {
+  position: fixed;
+  inset: 0; /* top, right, bottom, left = 0 */
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* Popup window */
+.popup-window {
+  background: #fff;
+  width: 90%;
+  max-width: 420px;
+  border-radius: 12px;
+  padding: 20px;
+  position: relative;
+  animation: popupFade 0.25s ease-in-out;
+}
+
+/* Close button */
+.popup-window .close {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: #333;
+}
+
+/* Image */
+.popup-window img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+
+/* Text */
+.popup-window h4 {
+  margin: 8px 0;
+  font-size: 20px;
+}
+
+.popup-window p {
+  margin: 6px 0;
+  color: #555;
+}
+
+/* Quantity buttons */
+.btns {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+#btn {
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+  cursor: pointer;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #f8f8f8;
+}
+
+#btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Add to cart button */
+#popup-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  background: #000;
+  color: #fff;
+}
+
+#popup-btn:disabled {
+  background: #aaa;
+  cursor: not-allowed;
+}
+
+/* Animation */
+@keyframes popupFade {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .cart-section {

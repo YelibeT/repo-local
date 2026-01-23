@@ -10,67 +10,50 @@ export default function Menu() {
   const [cart, setCart] = useState([]);
   const [activeItem, setActiveItem] = useState(null);
 
-  // Fetch menu items from backend
+  // Reset count whenever a new item is selected
+  useEffect(() => {
+    setCount(0);
+  }, [activeItem]);
+
   const fetchMenu = useCallback(async () => {
     try {
       setLoading(true);
-      let url = "http://localhost:5000/api/menu/items";
-      if (query) {
-        url = `http://localhost:5000/api/menu/search?q=${encodeURIComponent(query)}`;
-      }
-      if (fasting) {
-        url += query ? "&fasting=true" : "?fasting=true";
-      }
+      const params = new URLSearchParams();
+      if (query) params.append("q", query);
+      if (fasting) params.append("fasting", "true");
 
-      const result = await axios.get(url);
-      setMenuItems(result.data);
+      const endpoint = query ? "search" : "items";
+      const { data } = await axios.get(`http://localhost:5000/api/menu/${endpoint}?${params.toString()}`);
+      setMenuItems(data);
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching menu:", error);
     } finally {
       setLoading(false);
     }
   }, [query, fasting]);
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      fetchMenu();
-    }, 300);
+    const timeout = setTimeout(fetchMenu, 300);
     return () => clearTimeout(timeout);
-  }, [query, fasting, fetchMenu]);
+  }, [fetchMenu]);
 
   const addToCart = (item, quantity) => {
-  if (quantity < 1) return;
+    if (quantity < 1) return;
 
-  setCart((prevCart) => {
-    const existing = prevCart.find(
-      (i) => i.menuItem === item._id
-    );
+    setCart((prevCart) => {
+      const existing = prevCart.find((i) => i.menuItem === item.id);
+      if (existing) {
+        return prevCart.map((i) =>
+          i.menuItem === item.id ? { ...i, quantity: i.quantity + quantity } : i
+        );
+      }
+      return [...prevCart, { menuItem: item.id, name: item.name, price: item.price, quantity }];
+    });
 
-    if (existing) {
-      // increase existing quantity
-      return prevCart.map((i) =>
-        i.menuItem === item._id
-          ? { ...i, quantity: i.quantity + quantity }
-          : i
-      );
-    }
+    setActiveItem(null); // Close popup after adding
+  };
 
-    // add new item
-    return [
-      ...prevCart,
-      {
-        menuItem: item._id,
-        name: item.name,
-        price: item.price,
-        quantity,
-      },
-    ];
-  });
-
-  // reset quantity after adding
-  setCount(0);
-};
-
+  // ... (JSX remains largely the same, but use the new logic below)
   return (
     <div className="menu-layout">
       <div className="menu-section">
@@ -82,18 +65,25 @@ export default function Menu() {
             onChange={(e) => setQuery(e.target.value)}
           />
         </form>
+
         {loading ? (
           <p>Loading...</p>
-          ) : (
+        ) : (
           <div className="dishes">
             {menuItems.map((item) => (
-              <div key={item._id} className="food" onClick={()=>setActiveItem({
-                id:item.id,
-                name:item.name,
-                description:item.description,
-                image: item.image,
-                price: item.price
-              })}>
+              <div
+                key={item._id}
+                className="food"
+                onClick={() =>
+                  setActiveItem({
+                    id: item._id,
+                    name: item.name,
+                    description: item.description,
+                    image: item.image,
+                    price: item.price,
+                  })
+                }
+              >
                 <div>
                   <img src={item.image} alt={item.name} />
                   <h3>{item.name}</h3>
@@ -102,90 +92,112 @@ export default function Menu() {
             ))}
           </div>
         )}
-        {activeItem!==null && (
-            <div className="popup" key={activeItem.id}>
-              <div className="popup-window">
-                <a href="#" className="close" onClick={()=>setActiveItem(null)}>&times;</a>
-                <img src={activeItem.image} alt="" />
-                <h4>{activeItem.name}</h4>
-                <p>Description: {activeItem.description}</p>
-                <p>Price: {activeItem.price}</p>
-                <div className="btns">
-                  <button id="btn" onClick={()=>setCount(count+1)}>+</button>
-                  <input type="text" id="btn" value={count} readOnly/>
-                  <button id="btn" onClick={()=>setCount((c)=>Math.max(0,c-1))} disabled={count===0}>-</button>
-                </div>
-                <button id="popup-btn" disabled={count===0} onClick={()=>addToCart(activeItem, count)}>Add to cart</button>
+        {activeItem !== null && (
+          <div className="popup">
+            <div className="popup-window">
+              <a
+                className="close"
+                onClick={(e) => {
+                  setActiveItem(null);
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+              >
+                &times;
+              </a>
+              <img src={activeItem.image} alt="" />
+              <h4>{activeItem.name}</h4>
+              <p>Description: {activeItem.description}</p>
+              <p>Price: {activeItem.price}</p>
+              <div className="btns">
+                <button id="btn" onClick={() => setCount(count + 1)}>
+                  +
+                </button>
+                <input type="text" id="btn" value={count} readOnly />
+                <button
+                  id="btn"
+                  onClick={() => setCount((c) => Math.max(0, c - 1))}
+                  disabled={count === 0}
+                >
+                  -
+                </button>
               </div>
+              <button
+                id="popup-btn"
+                disabled={count === 0}
+                onClick={() => addToCart(activeItem, count)}
+              >
+                Add to cart
+              </button>
             </div>
+          </div>
         )}
       </div>
       <div className="cart-section">
-  <h2>Cart</h2>
+        <h2>Cart</h2>
 
-  {cart.length === 0 ? (
-    <p>No items yet</p>
-  ) : (
-    <>
-      {cart.map((item) => (
-        <div key={item.menuItem} className="cart-item">
-          <span>{item.name}</span>
+        {cart.length === 0 ? (
+          <p>No items yet</p>
+        ) : (
+          <>
+            {cart.map((item) => (
+              <div key={item.menuItem} className="cart-item">
+                <span>{item.name}</span>
 
-          <div>
-            <button
-              onClick={() =>
-                setCart((prev) =>
-                  prev
-                    .map((i) =>
-                      i.menuItem === item.menuItem
-                        ? { ...i, quantity: i.quantity - 1 }
-                        : i
-                    )
-                    .filter((i) => i.quantity > 0)
-                )
-              }
-            >
-              -
-            </button>
+                <div>
+                  <button
+                    onClick={() =>
+                      setCart((prev) =>
+                        prev
+                          .map((i) =>
+                            i.menuItem === item.menuItem
+                              ? { ...i, quantity: i.quantity - 1 }
+                              : i,
+                          )
+                          .filter((i) => i.quantity > 0),
+                      )
+                    }
+                  >
+                    -
+                  </button>
 
-            <span>{item.quantity}</span>
+                  <span>{item.quantity}</span>
 
-            <button
-              onClick={() =>
-                setCart((prev) =>
-                  prev.map((i) =>
-                    i.menuItem === item.menuItem
-                      ? { ...i, quantity: i.quantity + 1 }
-                      : i
-                  )
-                )
-              }
-            >
-              +
-            </button>
-          </div>
+                  <button
+                    onClick={() =>
+                      setCart((prev) =>
+                        prev.map((i) =>
+                          i.menuItem === item.menuItem
+                            ? { ...i, quantity: i.quantity + 1 }
+                            : i,
+                        ),
+                      )
+                    }
+                  >
+                    +
+                  </button>
+                </div>
 
-          <span>{item.price * item.quantity} birr</span>
-        </div>
-      ))}
+                <span>{item.price * item.quantity} birr</span>
+              </div>
+            ))}
 
-      <hr />
+            <hr />
 
-      <p>
-        <strong>
-          Total:{" "}
-          {cart.reduce(
-            (sum, item) => sum + item.price * item.quantity,
-            0
-          )}{" "}
-          birr
-        </strong>
-      </p>
-      <button>Place Order</button>
-    </>
-  )}
-</div>
-
+            <p>
+              <strong>
+                Total:{" "}
+                {cart.reduce(
+                  (sum, item) => sum + item.price * item.quantity,
+                  0,
+                )}{" "}
+                birr
+              </strong>
+            </p>
+            <button>Place Order</button>
+          </>
+        )}
+      </div>
     </div>
   );
 }

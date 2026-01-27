@@ -14,6 +14,12 @@ function Navbar() {
           <Link to="/OrderSuccess">Orders</Link>
         </li>
         <li>
+          <Link to="/profile">Profile</Link>
+        </li>
+        <li>
+          <Link to="/register">Register</Link>
+        </li>
+        <li>
           <Link to="/about">About</Link>
         </li>
         

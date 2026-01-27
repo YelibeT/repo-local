@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import menuRoutes from "./routes/menu.js";
 import orderRoutes from "./routes/orders.js";
+import authRoutes from "./routes/auth.js";
 
 //add restaurant location too-so maybe the map too,buisness hours
 dotenv.config();
@@ -18,6 +19,7 @@ mongoose
 
 app.use("/api/menu", menuRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/auth", authRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

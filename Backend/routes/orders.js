@@ -78,4 +78,28 @@ router.patch("/cancel/:id", async (req, res) => {
   }
 });
 
+// Update existing order (works for quantity edits AND adding new items)
+router.put("/update/:id", async (req, res) => {
+  try {
+    const { items } = req.body; // Expecting the full updated list of items
+    const order = await Order.findById(req.params.id);
+
+    if (!order) return res.status(404).json({ message: "Order not found" });
+    if (order.status !== "pending") {
+      return res.status(400).json({ message: "Order is already being prepared and cannot be changed." });
+    }
+
+    // Recalculate total price based on the new items list
+    const newTotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+    order.items = items;
+    order.totalPrice = newTotal;
+    
+    await order.save();
+    res.json({ message: "Order updated successfully", order });
+  } catch (err) {
+    res.status(500).json({ message: "Server error during update" });
+  }
+});
+
 export default router;

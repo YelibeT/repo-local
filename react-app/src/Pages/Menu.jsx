@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+
 
 export default function Menu() {
   const [query, setQuery] = useState("");
@@ -8,9 +9,11 @@ export default function Menu() {
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [count, setCount] = useState(0);
-  const [cart, setCart] = useState([]);
   const [activeItem, setActiveItem] = useState(null);
   const [isOrdering, setIsOrdering] = useState(false);
+  const location = useLocation();
+  const [cart, setCart] = useState(location.state?.existingItems || []);
+  const updatingOrderId = location.state?.updatingOrderId;
 
   useEffect(() => {
     setCount(0);
@@ -55,11 +58,33 @@ export default function Menu() {
   };
 // Inside Menu component:
 const navigate = useNavigate();
+const storedUser = localStorage.getItem("userInfo");
+
+// 2. Convert it from a string back into a JavaScript object
+const user = JSON.parse(storedUser);
 
 const gotoCheckout = () => {
-  if (cart.length === 0) return;
-  // Pass the cart data to the next route
-  navigate("/checkout", { state: { cart } });
+  const userInfo = localStorage.getItem("userInfo");
+
+  if (!userInfo) {
+    // 1. Not logged in? Send to Register
+    // We pass the cart so they don't have to pick their food again!
+    navigate("/Register", { state: { cart: cart } });
+  } else {
+    // 2. Logged in? Go straight to Checkout
+    navigate("/checkout", { state: { cart: cart } });
+  }
+};
+  const handleConfirmUpdate = async () => {
+  try {
+    await axios.put(`http://localhost:5000/api/orders/update/${updatingOrderId}`, {
+      items: cart
+    });
+    alert("Order updated with new items!");
+    navigate("/order-success", { state: { phone: user?.phone } });
+  } catch (err) {
+    alert("Update failed");
+  }
 };
 
   return (

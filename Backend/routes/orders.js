@@ -5,7 +5,7 @@ import Menu from "../models/Menu.js";
 const router = express.Router();
 
 // POST: Place a new order
-router.post("/", async (req, res) => {
+router.post("/place", async (req, res) => {
   try {
     const { items, customerName, customerPhone } = req.body;
 

@@ -10,23 +10,30 @@ export default function Register() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const endpoint = isLogin ? "/api/auth/login" : "/api/auth/register";
-    
-    try {
-      const { data } = await axios.post(`http://localhost:5000${endpoint}`, formData);
-      localStorage.setItem("userInfo", JSON.stringify(data));
+  e.preventDefault();
+  
+  // Create a specific object based on the mode
+  const payload = isLogin 
+    ? { phone: formData.phone } // Login only needs phone
+    : formData;                 // Register needs everything
 
-      // Redirect logic remains the same
-      if (location.state?.cart) {
-        navigate("/checkout", { state: { cart: location.state.cart } });
-      } else {
-        navigate("/profile");
-      }
-    } catch (err) {
-      alert(isLogin ? "Login failed" : "Registration failed");
+  const endpoint = isLogin ? "/api/auth/login" : "/api/auth/register";
+  
+  try {
+    const { data } = await axios.post(`http://localhost:5000${endpoint}`, payload);
+    localStorage.setItem("userInfo", JSON.stringify(data));
+
+    if (location.state?.cart) {
+      navigate("/checkout", { state: { cart: location.state.cart } });
+    } else {
+      // Use the phone number from the response data
+      navigate("/order-success", { state: { phone: data.phone } });
     }
-  };
+  } catch (err) {
+    console.error("Login/Register Error:", err.response?.data);
+    alert(err.response?.data?.message || "Authentication failed");
+  }
+};
 
   return (
     <div className="auth-container" style={{ maxWidth: '400px', margin: '50px auto', padding: '20px', border: '1px solid #ddd' }}>
@@ -45,7 +52,7 @@ export default function Register() {
         <input 
           type="tel" 
           placeholder="Phone Number" 
-          onChange={(e) => setFormData({...formData, phone: e.target.value})} 
+          onChange={(e) => setFormData({...formData, phone: e.target.value.trim()})} 
           required 
           style={inputStyle}
         />
